@@ -1,4 +1,6 @@
 .env
+api
+
 node_modules/**/*
 .expo/*
 npm-debug.*
