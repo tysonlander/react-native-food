@@ -1,30 +1,23 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import SearchBar from '../components/SearchBar';
-import yelp from '../api/yelp';
+import useResults from '../hooks/useResults';
+import ResultsList from '../components/ResultsList'
+
+// useEffect lets us run one piece of code when our component is rendered to the screen
 
 const SearchScreen = () => {
   const [term, setTerm] = useState('');
-  const [results, setResults] = useState([]);
-  const [errorMessage, setErrorMessage] = useState('')
+  const [searchApi, results, errorMessage] = useResults();
 
-  const searchApi = async (searchTerm) => {
-    try {
-      const response = await yelp.get('/search', {
-        params: {
-          limit: 50,
-          term: searchTerm,
-          location: 'san jose'
-        }
-      });
-      setResults(response.data.businesses);
-    } catch (err) {
-      setErrorMessage('Something went wrong')
-    }
-  };
+  const filterResultsByPrice = (price) => {
+    return results.filter(result => {
+      return result.price === price;
+    });
+  }
 
   return (
-    <View>
+    <>
       <SearchBar
         term={term}
         onTermChange={setTerm}
@@ -32,9 +25,21 @@ const SearchScreen = () => {
       />
       {errorMessage ? <Text>{errorMessage}</Text> : null}
 
-      <Text>Search Screen</Text>
-      <Text>We have found {results.length} results</Text>
-    </View>
+      <ScrollView>
+        <ResultsList
+          title="Cost Effective"
+          results={filterResultsByPrice('$')}
+        />
+        <ResultsList
+          title="Bit Pricier"
+          results={filterResultsByPrice('$$')}
+        />
+        <ResultsList
+          title="Big Spender"
+          results={filterResultsByPrice('$$$')}
+        />
+      </ScrollView>
+    </>
   );
 };
 
